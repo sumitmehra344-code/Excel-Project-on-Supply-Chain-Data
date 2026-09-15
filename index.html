@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supply Chain Executive Analytics Presentation</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --accent: #818cf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    .presentation-container {
+      width: 92%;
+      max-width: 1200px;
+      min-height: 680px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 40px 48px;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      flex-grow: 1;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Slide Headers */
+    .slide-header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .slide-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .slide-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      flex-grow: 1;
+      align-items: center;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* Metric Cards */
+    .metric-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      padding: 18px 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .metric-trend {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .trend-pos { color: var(--success); }
+    .trend-neg { color: var(--danger); }
+    .trend-warn { color: var(--warning); }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: rgba(51, 65, 85, 0.4);
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Content Lists & Callouts */
+    .insight-card {
+      background: rgba(15, 23, 42, 0.5);
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+
+    .insight-card h4 {
+      font-size: 15px;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .insight-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Navigation & Footer */
+    .presentation-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .nav-btn {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #475569;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 320px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="presentation-container">
+    
+    <!-- SLIDE 1: Title & Executive Summary -->
+    <div class="slide active" id="slide-0">
+      <div class="slide-header">
+        <div>
+          <h1 class="slide-title">Supply Chain Performance & Growth Strategy</h1>
+          <p class="slide-subtitle">Portfolio Margins, Supplier Efficiencies & Network Optimization</p>
+        </div>
+        <span class="badge">Executive Briefing</span>
+      </div>
+
+      <div class="grid-4">
+        <div class="metric-card">
+          <span class="metric-label">Total Net Revenue</span>
+          <span class="metric-value">$577,605</span>
+          <span class="metric-trend trend-pos">↑ 100 SKUs Across 3 Verticals</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Total Volume Sold</span>
+          <span class="metric-value">46,099</span>
+          <span class="metric-trend trend-pos">Units Shipped</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Avg Catalog Defect Rate</span>
+          <span class="metric-value">2.28%</span>
+          <span class="metric-trend trend-neg">⚠ Benchmark is 2.00%</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Avg Total Lead Time</span>
+          <span class="metric-value">36.5 Days</span>
+          <span class="metric-trend trend-warn">15% in High Risk Tier</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="insight-card" style="border-left-color: var(--primary);">
+          <h4>Core Opportunity: High-Margin Portfolio Expansion</h4>
+          <p>Cosmetics generates the highest gross margin (90.93%) and lowest defects (1.92%), but accounts for only 27.9% of top-line revenue. Scaling production delivers instant bottom-line accretion.</p>
+        </div>
+        <div class="insight-card" style="border-left-color: var(--danger);">
+          <h4>Primary Risk: Haircare Quality Breaches</h4>
+          <p>Haircare exhibits a 2.48% defect rate and the longest lead time (38.2 days). 55% of all SKUs catalog-wide exceed the 2.0% corporate quality ceiling.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Product Categories & Financial Mix -->
+    <div class="slide" id="slide-1">
+      <div class="slide-header">
+        <div>
+          <h2 class="slide-title">Product Portfolio & Margin Architecture</h2>
+          <p class="slide-subtitle">Revenue dominance vs. unit profitability by category</p>
+        </div>
+        <span class="badge">Product Mix</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="chart-box">
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Revenue</th>
+                <th>Units Sold</th>
+                <th>Gross Margin</th>
+                <th>Defect Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Skincare</strong></td>
+                <td>$241,628</td>
+                <td>20,731</td>
+                <td>89.91%</td>
+                <td style="color: var(--warning);">2.33%</td>
+              </tr>
+              <tr>
+                <td><strong>Haircare</strong></td>
+                <td>$174,455</td>
+                <td>13,611</td>
+                <td>89.01%</td>
+                <td style="color: var(--danger);">2.48%</td>
+              </tr>
+              <tr>
+                <td><strong>Cosmetics</strong></td>
+                <td>$161,521</td>
+                <td>11,757</td>
+                <td><strong>90.93%</strong></td>
+                <td style="color: var(--success);"><strong>1.92%</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding: 16px; font-size: 13px; color: var(--text-muted);">
+            💡 <strong>Key Takeaway:</strong> Rebalancing inventory allocations to increase Cosmetics representation from 26 SKUs closer to Skincare’s 40 SKUs will lift corporate margin while reducing warranty returns.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Regional Hub Performance -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div>
+          <h2 class="slide-title">Major Regional Logistics Hubs</h2>
+          <p class="slide-subtitle">Geographic sales realization and volume distribution</p>
+        </div>
+        <span class="badge">Geographic Analysis</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Hub Location</th>
+                <th>Total Sales ($)</th>
+                <th>Units Sold</th>
+                <th>Rev Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mumbai</strong></td>
+                <td>$137,755</td>
+                <td>9,426</td>
+                <td>23.85%</td>
+              </tr>
+              <tr>
+                <td><strong>Kolkata</strong></td>
+                <td>$137,078</td>
+                <td>12,770</td>
+                <td>23.73%</td>
+              </tr>
+              <tr>
+                <td><strong>Chennai</strong></td>
+                <td>$119,143</td>
+                <td>8,768</td>
+                <td>20.63%</td>
+              </tr>
+              <tr>
+                <td><strong>Bangalore</strong></td>
+                <td>$102,602</td>
+                <td>5,420</td>
+                <td>17.76%</td>
+              </tr>
+              <tr>
+                <td><strong>Delhi</strong></td>
+                <td>$81,028</td>
+                <td>9,715</td>
+                <td>14.03%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="chart-box">
+          <canvas id="locationChart"></canvas>
+        </div>
+      </div>
+      <div class="insight-card" style="margin-top: 18px; border-left-color: var(--warning);">
+        <h4>The Delhi Realization Anomaly</h4>
+        <p>Delhi achieved higher unit volume (9,715 units) than Mumbai (9,426 units) and Chennai (8,768 units), yet produced the lowest total revenue ($81.0k). Rationalizing regional discounting and introducing higher-margin bundles in Delhi will unlock an estimated $25k–$35k in immediate top-line expansion.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Supplier Performance & Quality Benchmarks -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div>
+          <h2 class="slide-title">Supplier Performance & Risk Rationalization</h2>
+          <p class="slide-subtitle">Evaluating defect rates, unit manufacturing costs, and throughput</p>
+        </div>
+        <span class="badge">Procurement Audit</span>
+      </div>
+
+      <div class="table-container" style="margin-bottom: 20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th>SKU Allocation</th>
+              <th>Revenue Managed</th>
+              <th>Avg Mfg Cost / Unit</th>
+              <th>Avg Defect Rate</th>
+              <th>Status / Recommendation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Supplier 1</strong></td>
+              <td>27 SKUs</td>
+              <td>$157,529</td>
+              <td>$45.25</td>
+              <td style="color: var(--success); font-weight: 600;">1.80%</td>
+              <td><span style="color: var(--success);">Preferred Partner (Scale Volume)</span></td>
+            </tr>
+            <tr>
+              <td><strong>Supplier 2</strong></td>
+              <td>22 SKUs</td>
+              <td>$125,467</td>
+              <td style="color: var(--success); font-weight: 600;">$41.62</td>
+              <td style="color: var(--warning);">2.36%</td>
+              <td>Cost Leader (Implement Quality Audit)</td>
+            </tr>
+            <tr>
+              <td><strong>Supplier 3</strong></td>
+              <td>15 SKUs</td>
+              <td>$97,796</td>
+              <td>$43.63</td>
+              <td style="color: var(--warning);">2.47%</td>
+              <td>Maintain Current Run-rate</td>
+            </tr>
+            <tr>
+              <td><strong>Supplier 4</strong></td>
+              <td>18 SKUs</td>
+              <td>$86,469</td>
+              <td style="color: var(--danger); font-weight: 600;">$62.71</td>
+              <td style="color: var(--warning);">2.34%</td>
+              <td><span style="color: var(--danger);">High Cost (+41.7% vs Avg) - Rationalize</span></td>
+            </tr>
+            <tr>
+              <td><strong>Supplier 5</strong></td>
+              <td>18 SKUs</td>
+              <td>$110,343</td>
+              <td>$44.77</td>
+              <td style="color: var(--danger); font-weight: 600;">2.67%</td>
+              <td><span style="color: var(--danger);">Worst Quality Defect Rate - Corrective Action</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="insight-card" style="border-left-color: var(--success);">
+          <h4>Procurement Re-allocation</h4>
+          <p>Supplier 1 is the <em>only</em> vendor meeting the sub-2.0% defect benchmark while offering fast turnaround (12.6 days lead time). Gradually transfer production lines from Supplier 4 and 5 to Supplier 1.</p>
+        </div>
+        <div class="insight-card" style="border-left-color: var(--accent);">
+          <h4>Direct Savings Impact</h4>
+          <p>Supplier 4 charges $62.71/unit versus Supplier 2's $41.62/unit. Re-negotiating or re-allocating 18 SKUs saves over $21.00 per unit in direct procurement expense.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Strategic Action Plan -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div>
+          <h2 class="slide-title">Executive Action Plan & Growth Roadmap</h2>
+          <p class="slide-subtitle">Target milestones for the next 2-4 business quarters</p>
+        </div>
+        <span class="badge">Implementation</span>
+      </div>
+
+      <div class="grid-3">
+        <div class="metric-card" style="border-top: 3px solid var(--primary);">
+          <span class="metric-label">Phase 1: 0 - 60 Days</span>
+          <h4 style="color: var(--text-main); margin-top: 4px;">Logistics & Route Arbitrage</h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+            • Reroute Kolkata and Chennai lanes from Route B to Route A ($110.18 avg unit freight savings).<br>
+            • Consolidate freight volume under Carrier B (5.3-day fastest turnaround).
+          </p>
+        </div>
+
+        <div class="metric-card" style="border-top: 3px solid var(--warning);">
+          <span class="metric-label">Phase 2: 60 - 120 Days</span>
+          <h4 style="color: var(--text-main); margin-top: 4px;">Vendor Consolidation</h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+            • Institute SLA penalties for Supplier 5 (defect rate > 2.5%).<br>
+            • Shift 18 high-cost SKUs from Supplier 4 to Suppliers 1 & 2 to capture bulk procurement discounts.
+          </p>
+        </div>
+
+        <div class="metric-card" style="border-top: 3px solid var(--success);">
+          <span class="metric-label">Phase 3: 120 - 180 Days</span>
+          <h4 style="color: var(--text-main); margin-top: 4px;">Revenue Growth & Expansion</h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+            • Expand Cosmetics SKU portfolio to capture 90.9% gross margin profile.<br>
+            • Roll out post-purchase CRM enrichment to reduce "Unknown" demographics (currently 30% of sales).
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 28px; background: rgba(56, 189, 248, 0.08); border: 1px dashed var(--primary); padding: 18px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h4 style="color: var(--primary); font-size: 15px;">Projected Annualized Impact</h4>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Gross Margin Improvement: <strong>+120-180 bps</strong> | Logistics Run-rate Savings: <strong>$18,000 - $25,000</strong> | Return Rates: <strong>-14%</strong></p>
+        </div>
+        <button class="nav-btn" onclick="alert('Analysis export complete.')">Download Summary</button>
+      </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="presentation-footer">
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">❮ Previous</button>
+      <div class="slide-counter" id="slideCounter">Slide 1 of 5</div>
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next ❯</button>
+    </div>
+
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const counter = document.getElementById('slideCounter');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === currentSlide));
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === slides.length - 1;
+      counter.textContent = `Slide ${currentSlide + 1} of ${slides.length}`;
+    }
+
+    function changeSlide(direction) {
+      const nextIndex = currentSlide + direction;
+      if (nextIndex >= 0 && nextIndex < slides.length) {
+        currentSlide = nextIndex;
+        updateSlide();
+      }
+    }
+
+    // Keyboard Arrow navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    // Initialize Chart.js Graphs
+    window.addEventListener('DOMContentLoaded', () => {
+      updateSlide();
+
+      // Category Revenue Chart
+      const catCtx = document.getElementById('categoryChart').getContext('2d');
+      new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Skincare ($241.6k)', 'Haircare ($174.5k)', 'Cosmetics ($161.5k)'],
+          datasets: [{
+            data: [241628, 174455, 161521],
+            backgroundColor: ['#38bdf8', '#fbbf24', '#34d399'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 12 } } },
+            title: { display: true, text: 'Revenue Distribution by Category', color: '#f8fafc', font: { size: 14 } }
+          }
+        }
+      });
+
+      // Location Revenue Chart
+      const locCtx = document.getElementById('locationChart').getContext('2d');
+      new Chart(locCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Mumbai', 'Kolkata', 'Chennai', 'Bangalore', 'Delhi'],
+          datasets: [{
+            label: 'Revenue ($)',
+            data: [137755, 137078, 119143, 102602, 81028],
+            backgroundColor: '#818cf8',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          },
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Total Revenue by Regional Hub ($)', color: '#f8fafc', font: { size: 14 } }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
